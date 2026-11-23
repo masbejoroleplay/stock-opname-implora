@@ -461,6 +461,7 @@ tbody td{padding:8px 4px;vertical-align:middle;overflow:hidden}
           <select class="field-select" id="sheetSelect" onchange="switchStore(this.value)">
             <option value="AEON">AEON</option>
             <option value="WATSONS">WATSONS</option>
+            <option value="BOOTS">BOOTS</option>
           </select>
         </div>
         <div>
@@ -497,6 +498,7 @@ tbody td{padding:8px 4px;vertical-align:middle;overflow:hidden}
       <div class="tabs">
         <button class="tab active" id="tabAEON" onclick="switchStore('AEON')">AEON <span class="tab-badge" id="badgeAEON">0</span></button>
         <button class="tab" id="tabWATSONS" onclick="switchStore('WATSONS')">WATSONS <span class="tab-badge" id="badgeWATSONS">0</span></button>
+        <button class="tab" id="tabBOOTS" onclick="switchStore('BOOTS')">BOOTS <span class="tab-badge" id="badgeBOOTS">0</span></button>
       </div>
       <div class="search-bar-wrap">
         <div class="search-row">
@@ -798,6 +800,7 @@ tbody td{padding:8px 4px;vertical-align:middle;overflow:hidden}
             <select class="field-select" id="irSheetStore" onchange="onIRSheetChange()">
               <option value="AEON">AEON</option>
               <option value="WATSONS">WATSONS</option>
+              <option value="BOOTS">BOOTS</option>
             </select>
           </div>
           <div>
@@ -3609,7 +3612,8 @@ document.addEventListener('click', function(e) { if (_filterDDOpen && !e.target.
 // ================================================================
 var COLOR_MODIFIERS = ['dark','ash','medium','light','natural','warm','cool','deep','soft'];
 function entryMatchesProduct(entryLabel, p) {
-  var el = entryLabel.toLowerCase().trim(), d = p.desc.toLowerCase(), k = p.kode.toLowerCase();
+  function norm(s) { return s.toLowerCase().replace(/\bmauve\b/g,'mouve').replace(/\s+/g,' ').trim(); }
+  var el = norm(entryLabel), d = norm(p.desc), k = norm(p.kode);
   function escRe(s) { return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
   function wholeWord(haystack, needle) { return new RegExp('(?:^|[^a-z0-9])'+escRe(needle)+'(?:[^a-z0-9]|$)').test(haystack); }
   var entryWords = el.split(/\s+/), isPlainColor = entryWords.length === 1 && COLOR_MODIFIERS.indexOf(entryWords[0]) < 0;
@@ -3622,7 +3626,7 @@ function entryMatchesProduct(entryLabel, p) {
     if (!rejS && (wholeWord(d, stripped) || wholeWord(k, stripped))) return true;
   }
   var numOnly = el.match(/^(\d+)$/);
-  if (numOnly && k.match(new RegExp('[\\-\\.x]0*'+numOnly[1]+'(?:\\D|$)'))) return true;
+  if (numOnly && k.match(new RegExp('[\-\.x]0*'+numOnly[1]+'(?:\D|$)'))) return true;
   return false;
 }
 function catMatchesProduct(p, catKey) {
@@ -3741,7 +3745,7 @@ var PRODUCTS = {
     {no:102,kode:"12J.PCCMH.G002K201XX",desc:"IMP CAFFE MATTE LIPCREAM (103 HAZELNUT CREAM) (6X12X2.9 GR)"},
     {no:103,kode:"12J.PCCMC.G002K201XX",desc:"IMP CAFFE MATTE LIPCREAM (104 CAPPUCCINO) (6X12X2.9 GR)"},
     {no:104,kode:"12J.PCCMR.G002K201XX",desc:"IMP CAFFE MATTE LIPCREAM (201 ROSE LATTE) (6X12X2.9 GR)"},
-   {no:105,kode:"12J.PCCMA.G002K201XX",desc:"IMP CAFFE MATTE LIPCREAM (301 AMERICANO) (6X12X2.9 GR)"},
+    {no:105,kode:"12J.PCCMA.G002K201XX",desc:"IMP CAFFE MATTE LIPCREAM (301 AMERICANO) (6X12X2.9 GR)"},
     {no:106,kode:"12J.PCLDN.G033K201XX",desc:"IMP URBAN MATTE LIPCREAM DUSKY NUDE (2301) (6x12x3.3GR)"},
     {no:107,kode:"12J.PCLTC.G033K201XX",desc:"IMP URBAN MATTE LIPCREAM TERRA COTTA (2302) (6x12x3.3GR)"},
     {no:108,kode:"12J.PCLDB.G033K201XX",desc:"IMP URBAN MATTE LIPCREAM DARK BERRY (2303) (6x12x3.3GR)"},
@@ -3786,17 +3790,17 @@ var PRODUCTS = {
     {no:147,kode:"12J.PCLCC.G003K201XX",desc:"IMP LIPMATTE INTENSE 01 CHERRY CRUSH (2401) (6X12X3.5 GR)"},
     {no:148,kode:"12J.PCLMM.G003K201XX",desc:"IMP LIPMATTE INTENSE 02 MAPLE MOCHA (2402) (6X12X3.5 GR)"},
     {no:149,kode:"12J.PCLSP.G003K201XX",desc:"IMP LIPMATTE INTENSE 03 SHEER PLUM (2403) (6X12X3.5 GR)"},
-    {no:150,kode:"JDLIP-2404",desc:"IMP LIPSTICK INT MATTE DIRTY PEACH"},
+    {no:150,kode:"12J.PCLDP.G003K201XX",desc:"IMP LIPMATTE INTENSE 04 DIRTY PEACH (2404) (6X12X3.5 GR)"},
     {no:151,kode:"12J.PCLBA.G003K201XX",desc:"IMP LIPMATTE INTENSE 05 BERRY ALLURE (2405) (6X12X3.5 GR)"},
     {no:152,kode:"JDLIP-2406",desc:"IMP LIPSTICK INT MATTE TANGERINE CRUSH"},
     {no:153,kode:"12J.PCCLJ.G0055701XX",desc:"IMPLORA CHEEK & LIPTINT JUICY JUICE (36X12X5,5GR)"},
     {no:154,kode:"12J.PCCLR.G0055701XX",desc:"IMPLORA CHEEK & LIPTINT RED VELVET (36X12X5,5GR)"},
     {no:155,kode:"12J.PCCLW.G0055701XX",desc:"IMPLORA CHEEK & LIPTINT WAFFLE CRUMBLE (36X12X5,5GR)"},
-    {no:156,kode:"JDLIP-2501",desc:"IMP CHEEK & LIPTINT VAMPIRE BLOOD"},
-    {no:157,kode:"JDLIP-2502",desc:"IMP CHEEK & LIPTINT CHERRY BOMB"},
-    {no:158,kode:"JDLIP-2503",desc:"IMP CHEEK & LIPTINT CANDY APPLE"},
+    {no:156,kode:"12J.PCCVB.G005K201XX",desc:"IMPLORA CHEEK & LIPTINT VAMPIRE BLOOD (2501) (6X12X5.5 GR)"},
+    {no:157,kode:"12J.PCCCB.G005K201XX",desc:"IMPLORA CHEEK & LIPTINT CHERRY BOMB (2502) (6X12X5.5 GR)"},
+    {no:158,kode:"12J.PCCCA.G005K201XX",desc:"IMPLORA CHEEK & LIPTINT CANDY APPLE (2503) (6X12X5.5 GR)"},
     {no:159,kode:"JDLIP-2504",desc:"IMP CHEEK & LIPTINT RED WINE"},
-    {no:160,kode:"JDLIP-2505",desc:"IMP CHEEK & LIPTINT CRANBERRY"},
+    {no:160,kode:"12J.PCCCR.G005K201XX",desc:"IMPLORA CHEEK & LIPTINT CRANBERRY (2505) (6X12X5.5 GR)"},
     {no:161,kode:"JDLIP-2506",desc:"IMP CHEEK & LIPTINT PUMPKIN"},
     {no:162,kode:"JDLIP-2601",desc:"IMP LIP CRAYON SATIN CURIOUS"},
     {no:163,kode:"JDLIP-2602",desc:"IMP LIP CRAYON SATIN FIRST KISS"},
@@ -3810,14 +3814,14 @@ var PRODUCTS = {
     {no:171,kode:"JDLIP-2704",desc:"IMP LIP VELVET NAIVE"},
     {no:172,kode:"JDLIP-2705",desc:"IMP LIP VELVET EXTROVERT"},
     {no:173,kode:"JDLIP-2706",desc:"IMP LIP VELVET SERENITY"},
-    {no:174,kode:"JDLIP-2801",desc:"IMPLORA JELLY TINT MARIPOSA"},
+    {no:174,kode:"12J.PCJTM.M005K201XX",desc:"IMP JELLY TINT MARIPOSA (2801)(6X12X5ML)"},
     {no:175,kode:"12J.PCJTS.M005K201XX",desc:"IMP JELLY TINT SAVY RED (2802)(6X12X5ML)"},
     {no:176,kode:"12J.PCJTT.M005K201XX",desc:"IMP JELLY TINT TRUE VINTAGE (2803)(6X12X5ML)"},
-    {no:177,kode:"JDLIP-2804",desc:"IMPLORA JELLY TINT ROSY POSY"},
+    {no:177,kode:"12J.PCJTR.M005K201XX",desc:"IMP JELLY TINT ROSY POSY (2804)(6X12X5ML)"},
     {no:178,kode:"12J.PCJTD.M005K201XX",desc:"IMP JELLY TINT DREAM PEACH (2805)(6X12X5ML)"},
-    {no:179,kode:"JDLIP-2806",desc:"IMPLORA JELLY TINT FLAMINGO"},
+    {no:179,kode:"12J.PCJTF.M005K201XX",desc:"IMP JELLY TINT FLAMINGO (2806)(6X12X5ML)"},
     {no:180,kode:"JDLIP-2807",desc:"IMPLORA JELLY TINT SANGRIA"},
-    {no:181,kode:"JDLIP-2808",desc:"IMPLORA JELLY TINT BURNT ORANGE"},
+    {no:181,kode:"12J.PCJTB.M005K201XX",desc:"IMP JELLY TINT BURNT ORANGE (2808)(6X12X5ML)"},
     {no:182,kode:"12J.PCJTW.M005K201XX",desc:"IMP JELLY TINT ROSEWOOD (2809)(6X12X5ML)"},
     {no:183,kode:"JDLMS-1001",desc:"IMP LIP MOIST SERUM"},
     {no:184,kode:"JDLMS-1002",desc:"IMP LIP MOIST ESSENCE"},
@@ -3970,14 +3974,14 @@ var PRODUCTS = {
     {no:112,kode:"12J.PCLCC.G003K201XX",desc:"IMP LIPMATTE INTENSE 01 CHERRY CRUSH (2401) (6X12X3.5 GR)"},
     {no:113,kode:"12J.PCLMM.G003K201XX",desc:"IMP LIPMATTE INTENSE 02 MAPLE MOCHA (2402) (6X12X3.5 GR)"},
     {no:114,kode:"12J.PCLSP.G003K201XX",desc:"IMP LIPMATTE INTENSE 03 SHEER PLUM (2403) (6X12X3.5 GR)"},
-    {no:115,kode:"JDLIP-2404",desc:"IMP LIPSTICK INT MATTE DIRTY PEACH"},
+    {no:115,kode:"12J.PCLDP.G003K201XX",desc:"IMP LIPMATTE INTENSE 04 DIRTY PEACH (2404) (6X12X3.5 GR)"},
     {no:116,kode:"12J.PCLBA.G003K201XX",desc:"IMP LIPMATTE INTENSE 05 BERRY ALLURE (2405) (6X12X3.5 GR)"},
     {no:117,kode:"JDLIP-2406",desc:"IMP LIPSTICK INT MATTE TANGERINE CRUSH"},
-    {no:118,kode:"JDLIP-2501",desc:"IMP CHEEK & LIPTINT VAMPIRE BLOOD"},
-    {no:119,kode:"JDLIP-2502",desc:"IMP CHEEK & LIPTINT CHERRY BOMB"},
-    {no:120,kode:"JDLIP-2503",desc:"IMP CHEEK & LIPTINT CANDY APPLE"},
+    {no:118,kode:"12J.PCCVB.G005K201XX",desc:"IMPLORA CHEEK & LIPTINT VAMPIRE BLOOD (2501) (6X12X5.5 GR)"},
+    {no:119,kode:"12J.PCCCB.G005K201XX",desc:"IMPLORA CHEEK & LIPTINT CHERRY BOMB (2502) (6X12X5.5 GR)"},
+    {no:120,kode:"12J.PCCCA.G005K201XX",desc:"IMPLORA CHEEK & LIPTINT CANDY APPLE (2503) (6X12X5.5 GR)"},
     {no:121,kode:"JDLIP-2504",desc:"IMP CHEEK & LIPTINT RED WINE"},
-    {no:122,kode:"JDLIP-2505",desc:"IMP CHEEK & LIPTINT CRANBERRY"},
+    {no:122,kode:"12J.PCCCR.G005K201XX",desc:"IMPLORA CHEEK & LIPTINT CRANBERRY (2505) (6X12X5.5 GR)"},
     {no:123,kode:"JDLIP-2506",desc:"IMP CHEEK & LIPTINT PUMPKIN"},
     {no:124,kode:"JDLIP-2601",desc:"IMP LIP CRAYON SATIN CURIOUS"},
     {no:125,kode:"JDLIP-2602",desc:"IMP LIP CRAYON SATIN FIRST KISS"},
@@ -3991,14 +3995,14 @@ var PRODUCTS = {
     {no:133,kode:"JDLIP-2704",desc:"IMP LIP VELVET NAIVE"},
     {no:134,kode:"JDLIP-2705",desc:"IMP LIP VELVET EXTROVERT"},
     {no:135,kode:"JDLIP-2706",desc:"IMP LIP VELVET SERENITY"},
-    {no:136,kode:"JDLIP-2801",desc:"IMPLORA JELLY TINT MARIPOSA"},
+    {no:136,kode:"12J.PCJTM.M005K201XX",desc:"IMP JELLY TINT MARIPOSA (2801)(6X12X5ML)"},
     {no:137,kode:"12J.PCJTS.M005K201XX",desc:"IMP JELLY TINT SAVY RED (2802)(6X12X5ML)"},
     {no:138,kode:"12J.PCJTT.M005K201XX",desc:"IMP JELLY TINT TRUE VINTAGE (2803)(6X12X5ML)"},
-    {no:139,kode:"JDLIP-2804",desc:"IMPLORA JELLY TINT ROSY POSY"},
+    {no:139,kode:"12J.PCJTR.M005K201XX",desc:"IMP JELLY TINT ROSY POSY (2804)(6X12X5ML)"},
     {no:140,kode:"12J.PCJTD.M005K201XX",desc:"IMP JELLY TINT DREAM PEACH (2805)(6X12X5ML)"},
-    {no:141,kode:"JDLIP-2806",desc:"IMPLORA JELLY TINT FLAMINGO"},
+    {no:141,kode:"12J.PCJTF.M005K201XX",desc:"IMP JELLY TINT FLAMINGO (2806)(6X12X5ML)"},
     {no:142,kode:"JDLIP-2807",desc:"IMPLORA JELLY TINT SANGRIA"},
-    {no:143,kode:"JDLIP-2808",desc:"IMPLORA JELLY TINT BURNT ORANGE"},
+    {no:143,kode:"12J.PCJTB.M005K201XX",desc:"IMP JELLY TINT BURNT ORANGE (2808)(6X12X5ML)"},
     {no:144,kode:"12J.PCJTW.M005K201XX",desc:"IMP JELLY TINT ROSEWOOD (2809)(6X12X5ML)"},
     {no:145,kode:"JDLMS-1001",desc:"IMP LIP MOIST SERUM"},
     {no:146,kode:"JDLMS-1002",desc:"IMP LIP MOIST ESSENCE"},
@@ -4022,7 +4026,8 @@ var PRODUCTS = {
     {no:164,kode:"12J.PCSPF.M050E101XX",desc:"IMPLORA PERFECT SHIELD GEL SUNSCREEN SPF 30 PA +++ (6x12x50ML)"},
     {no:165,kode:"12J.PCSP4.M025J801XX",desc:"IMPLORA PERFECT SHIELD SUNSCREEN SPF 40 PA ++++ (48x25ML)"},
     {no:166,kode:"12J.PCSP5.M025J801XX",desc:"IMPLORA PERFECT SHIELD SUNSCREEN SPF 50 PA ++++ (48x25ML)"}
-  ]
+  ],
+  boots:[]
 };
 
 // ================================================================
@@ -4174,7 +4179,7 @@ function getShortDesc(desc){
   return s.toUpperCase();
 }
 function addLogEntry(store,prodIdx,field,oldVal,newVal){
-  var prods=store==='AEON'?PRODUCTS.aeon:PRODUCTS.watsons;
+  var prods=getProdsFor(store);
   if(!prods[prodIdx])return;
   var p=prods[prodIdx];
   var oldN=parseInt(oldVal)||0,newN=parseInt(newVal)||0;
@@ -4232,30 +4237,30 @@ var STORE_DB=[
   {code:'GGP',name:'Grand Galaxy Park'},{code:'PPG',name:'Plaza Pondok Gede'},{code:'BUP',name:'Buaran Plaza'},
   {code:'CCM',name:'Cibinong City Mall'},{code:'ELB',name:'Eka Lokasari Bogor'},{code:'BTM',name:'Bogor Trade Mall'},
   {code:'CMD',name:'Cinere Mall Depok'},{code:'DMD',name:'Mall Depok'},{code:'MCR',name:'Margo City Reborn'},
-  {code:'TCB',name:'Trans Studio Cibubur'},{code:'LSS',name:'Lokasari Square'},
-  {code:'MJT',name:'Menara Jakarta'},{code:'SKR',name:'Mall Karawaci Reborn'},{code:'LWM',name:'Living World'},
-  {code:'1006',name:'AEON Alam Sutera'},{code:'MSP',name:'Serpong Paradise'},{code:'IBS',name:'ITC BSD'},
-  {code:'TKO',name:'Teras Kota'},{code:'GMM',name:'Grand Metropolitan Mall'},{code:'PMB',name:'Pakuwon Mall Bekasi'},
-  {code:'MMB',name:'Metropolitan Mall Bekasi'},{code:'MKG',name:'Mall Kelapa Gading'},{code:'SNM',name:'Sunter Mall'},
-  {code:'CMM',name:'Metropolitan Mall Cileungsi'},{code:'PNK',name:'Panakukang'},
-  {code:'MOI',name:'Mall Of Indonesia'},{code:'MAG',name:'Mall Artha Gading'},{code:'LHI',name:'Living Plaza Harapan Indah'},
-  {code:'1002',name:'AEON Jakarta Garden City'},{code:'KJI',name:'Kramat Jati Indah'},{code:'MKK',name:'Mall Kota Kasablanka'},
-  {code:'MCJ',name:'Mall Cijantung'},{code:'1004',name:'AEON Tanjung Barat'},{code:'PFT',name:'Plaza Festival'},
-  {code:'PZK',name:'Plaza Kalibata'},{code:'7001',name:'AEON Health & Beauty Lotte'},{code:'AOS',name:'AEON Sentul'},
-  {code:'1003',name:'AEON Sentul City'},{code:'LWK',name:'Living World Kotawisata'},{code:'PCB',name:'Plaza Cibubur'},
-  {code:'1007',name:'AEON Kota Wisata'},{code:'LCK',name:'Lippo Mall Cikarang'},{code:'1005',name:'AEON Deltamas'},
-  {code:'MPI',name:'Mall Puri Indah'},{code:'NLP',name:'New Lippo Mall Puri'},{code:'7002',name:'AEON Health & Beauty Puri'},
-  {code:'NKV',name:'New Kemang Village'},{code:'GDC',name:'Gandaria City'},{code:'7003',name:'AEON Health & Beauty BXC'},
-  {code:'CRT',name:'Citra Raya Tangerang'},{code:'1008',name:'AEON Ciputra Tangerang'},{code:'CEP',name:'Central Park'},
-  {code:'NGM',name:'New Gajah Mada Plaza'},{code:'7004',name:'AEON Health & Beauty Citraland'},{code:'1001',name:'AEON BSD City'},
-  {code:'1010',name:'AEON Eastvara'},{code:'1014',name:'AEON Emporium Pluit'}
+  {code:'TCB',name:'Trans Studio Cibubur'},{code:'LSS',name:'Lokasari Square'},{code:'MJT',name:'Menara Jakarta'},
+  {code:'SKR',name:'Mall Karawaci Reborn'},{code:'LWM',name:'Living World'},{code:'1006',name:'AEON Alam Sutera'},
+  {code:'MSP',name:'Serpong Paradise'},{code:'IBS',name:'ITC BSD'},{code:'TKO',name:'Teras Kota'},
+  {code:'GMM',name:'Grand Metropolitan Mall'},{code:'PMB',name:'Pakuwon Mall Bekasi'},{code:'MMB',name:'Metropolitan Mall Bekasi'},
+  {code:'MKG',name:'Mall Kelapa Gading'},{code:'SNM',name:'Sunter Mall'},{code:'CMM',name:'Metropolitan Mall Cileungsi'},
+  {code:'PNK',name:'Panakukang'},{code:'MOI',name:'Mall Of Indonesia'},{code:'MAG',name:'Mall Artha Gading'},
+  {code:'LHI',name:'Living Plaza Harapan Indah'},{code:'1002',name:'AEON Jakarta Garden City'},{code:'KJI',name:'Kramat Jati Indah'},
+  {code:'MKK',name:'Mall Kota Kasablanka'},{code:'MCJ',name:'Mall Cijantung'},{code:'1004',name:'AEON Tanjung Barat'},
+  {code:'PFT',name:'Plaza Festival'},{code:'PZK',name:'Plaza Kalibata'},{code:'7001',name:'AEON Health & Beauty Lotte'},
+  {code:'AOS',name:'AEON Sentul'},{code:'1003',name:'AEON Sentul City'},{code:'LWK',name:'Living World Kotawisata'},
+  {code:'PCB',name:'Plaza Cibubur'},{code:'1007',name:'AEON Kota Wisata'},{code:'LCK',name:'Lippo Mall Cikarang'},
+  {code:'1005',name:'AEON Deltamas'},{code:'MPI',name:'Mall Puri Indah'},{code:'NLP',name:'New Lippo Mall Puri'},
+  {code:'7002',name:'AEON Health & Beauty Puri'},{code:'NKV',name:'New Kemang Village'},{code:'GDC',name:'Gandaria City'},
+  {code:'7003',name:'AEON Health & Beauty BXC'},{code:'CRT',name:'Citra Raya Tangerang'},{code:'1008',name:'AEON Ciputra Tangerang'},
+  {code:'CEP',name:'Central Park'},{code:'NGM',name:'New Gajah Mada Plaza'},{code:'7004',name:'AEON Health & Beauty Citraland'},
+  {code:'1001',name:'AEON BSD City'},{code:'1010',name:'AEON Eastvara'},{code:'1014',name:'AEON Emporium Pluit'},
+  {code:'TMW',name:'Tomorrow World'}
 ];
 
 // ================================================================
 // REPOSITORY — daftar kode toko yang masuk channel Repository
 // (selain kode di bawah ini, otomatis masuk ke History)
 // ================================================================
-var REPOSITORY_STORE_CODES=['GPK','ICM','MLM','NBM','BUP','CIM','GGP','LHI','PPG','CPJ','KJI','MCJ','MKK','PZK','PFT','LWK','PCB','TCB','LSS','KCS','GMM','LCK','MMB','PMB','MAG','MKG','MOI','SNM','MJT','1004','1002','7001','1007','1005','7005','1014'];
+var REPOSITORY_STORE_CODES=['GPK','ICM','NBM','BUP','CIM','GGP','LHI','PPG','CPJ','KJI','MCJ','MKK','PZK','PFT','LWK','PCB','TCB','KCS','GMM','LCK','MMB','PMB','MAG','MKG','MOI','SNM','CMM','CCM','AOS','BTM'];
 function isRepoStore(code){return REPOSITORY_STORE_CODES.indexOf(code)>=0;}
 
 // ================================================================
@@ -4295,7 +4300,7 @@ function doRedo(){if(_redoStack.length===0)return;var entry=_redoStack.pop();var
 // ================================================================
 var GEN_FIELD_KEYS=['bw','la','rr','rp','gu'];
 var GEN_INTENSITY_RANGE={low:[1,2],medium:[3,4],high:[5,5]};
-function getProdsFor(sheet){return sheet==='AEON'?PRODUCTS.aeon:PRODUCTS.watsons;}
+function getProdsFor(sheet){return PRODUCTS[String(sheet||'').toLowerCase()]||[];}
 function genRandInt(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
 function genShuffle(arr){
   var a=arr.slice();
@@ -4427,21 +4432,13 @@ var ddOpen=false;
 function toggleStoreDD(){ddOpen?closeStoreDD():openStoreDD();}
 function openStoreDD(){ddOpen=true;var dd=document.getElementById('storeDD'),btn=document.getElementById('storeDisplay'),rect=btn.getBoundingClientRect();dd.style.top=(rect.bottom+4)+'px';dd.style.left=rect.left+'px';dd.style.width=Math.max(rect.width,300)+'px';dd.classList.add('open');var s=document.getElementById('storeSearch');s.value='';renderStoreList('');setTimeout(function(){s.focus();},60);}
 function closeStoreDD(){ddOpen=false;document.getElementById('storeDD').classList.remove('open');}
-function renderStoreList(q){var query=(q||'').toLowerCase().trim();var filtered=query?STORE_DB.filter(function(s){return s.code.toLowerCase().indexOf(query)>=0||s.name.toLowerCase().indexOf(query)>=0;}):STORE_DB;var list=document.getElementById('storeList');if(!filtered.length){list.innerHTML='<div class="store-empty">Toko tidak ditemukan</div>';return;}var html='';for(var i=0;i<filtered.length;i++){var s=filtered[i];html+='<div class="store-opt" onmousedown="pickStore(\''+s.code+'\',\''+s.name.replace(/'/g,"\\'")+'\')">'+'<span class="store-code">'+s.code+'</span><span class="store-name">'+s.name+'</span></div>';}list.innerHTML=html;}
-function pickStore(code,name){document.getElementById('storeCode').value=code;document.getElementById('storeName2').value=name;document.getElementById('storeDisplay').textContent=code+' \u2014 '+name;closeStoreDD();scheduleSave();}
-document.addEventListener('click',function(e){if(ddOpen&&!e.target.closest('.store-picker')&&!e.target.closest('#storeDD'))closeStoreDD();});
-window.addEventListener('scroll',function(){if(ddOpen)openStoreDD();},true);
-window.addEventListener('resize',function(){if(ddOpen)openStoreDD();if(_filterDDOpen)openFilterDD();});
-
-// ================================================================
-// SEARCH + FILTER
-// ================================================================
-function onSearchInput(){
-  var v=document.getElementById('searchInput').value;
-  document.getElementById('searchClearBtn').classList.toggle('hidden',!v);
-  if(v&&_activeFilterKey){_activeFilterKey=null;updateFilterBtnState();}
-  applyFilter();
+function storeAllowedForSheet(s, sheet) {
+  if (sheet === 'BOOTS') return false;
+  if (sheet === 'AEON') return /^AEON\b/i.test(s.name) || s.code === 'AOS';
+  return /^[A-Z]{3}$/.test(s.code);
 }
+function storeDisplayLabel(code,name,sheet) { return sheet === 'AEON' ? name : code+' \u2014 '+name; }
+function renderStoreList(q){var query=(q||'').toLowerCase().trim();var sheet=currentStore;var base=STORE_DB.filter(function(s){return storeAllowedForSheet(s,sheet);});var filtered=query?base.filter(function(s){return s.code.toLowerCase().indexOf(query)>=0||s.name.toLowerCase().indexOf(query)>=0;}):base;var list=document.getElementById('storeList');if(!filtered.length){list.innerHTML='<div class="store-empty">Toko tidak ditemukan</div>';return;}var html='';for(var i=0;i<filtered.length;i++){var s=filtered[i];html+='<div class="store-opt" onmousedown="pickStore(\''+s.code+'\',\''+s.name.replace(/'/g,"\\'")+"\')">"+'<span class="store-code">'+(sheet==='AEON'?'':s.code)+'</span><span class="store-name">'+s.name+'</span></div>'; }list.innerHTML=html;}
 function clearSearch(e){
   if(e)e.preventDefault();
   var inp=document.getElementById('searchInput');
@@ -4472,7 +4469,7 @@ function applyFilter(){
 // ================================================================
 // TABLE
 // ================================================================
-function getProds(){return currentStore==='AEON'?PRODUCTS.aeon:PRODUCTS.watsons;}
+function getProds(){return getProdsFor(currentStore);}
 function calcTotal(d){return(parseInt(d.bw)||0)+(parseInt(d.la)||0)+(parseInt(d.rr)||0)+(parseInt(d.rp)||0)+(parseInt(d.gu)||0);}
 function renderTable(){
   var prods=getProds(),rows=[];
@@ -4506,16 +4503,18 @@ function switchStore(store){
   document.getElementById('sheetSelect').value=store;
   document.getElementById('tabAEON').className=store==='AEON'?'tab active':'tab';
   document.getElementById('tabWATSONS').className=store==='WATSONS'?'tab active':'tab';
+  document.getElementById('tabBOOTS').className=store==='BOOTS'?'tab active':'tab';
   document.getElementById('searchInput').value='';
   document.getElementById('searchClearBtn').classList.add('hidden');
   renderTable();
+  renderStoreList('');
 }
 
 // ================================================================
 // JSON IMPORT
 // ================================================================
 function buildImportPlan(jsonObj,store){
-  var prods=store==='AEON'?PRODUCTS.aeon:PRODUCTS.watsons,plan=[],cats=Object.keys(jsonObj);
+  var prods=getProdsFor(store),plan=[],cats=Object.keys(jsonObj);
   for(var ci=0;ci<cats.length;ci++){
     var catKey=cats[ci],entries=jsonObj[catKey],catProds=[];
     for(var pi=0;pi<prods.length;pi++)if(catMatchesProduct(prods[pi],catKey))catProds.push({p:prods[pi],idx:pi});
@@ -4600,7 +4599,7 @@ function openWAReport(){
   _activePage='wa';setHeaderBack(true);setBottomBack(true);
   var store=document.getElementById('sheetSelect').value,storeCode=document.getElementById('storeCode').value,storeName2=document.getElementById('storeName2').value,tgl=document.getElementById('tanggal').value||'',tglShort='';
   if(tgl){var tp=tgl.split('-');tglShort=tp[2]+'/'+tp[1]+'/'+tp[0];}
-  var prods=store==='AEON'?PRODUCTS.aeon:PRODUCTS.watsons,kosong=[],menipis=[];
+  var prods=getProdsFor(store),kosong=[],menipis=[];
   for(var i=0;i<prods.length;i++){var d=qtyData[store][i]||{},tot=calcTotal(d);if(tot===0)kosong.push(prods[i].desc);else if(tot===1||tot===2)menipis.push(prods[i].desc);}
   var tmpl=loadWATemplates(),kunjKey=store==='AEON'?'aeon_kunjungan':'watsons_kunjungan',kunjText=tmpl[kunjKey]||'';
   var headerLine=(store==='WATSONS'?(storeCode?'Watsons '+storeCode+' '+storeName2:'Watsons'):(storeName2||'Aeon'))+'\n'+tglShort;
@@ -4622,7 +4621,7 @@ function autoResizeTA(ta){ta.style.height='auto';ta.style.height=ta.scrollHeight
 function copyWAReport(){
   var store=document.getElementById('sheetSelect').value,storeCode=document.getElementById('storeCode').value,storeName2=document.getElementById('storeName2').value,tgl=document.getElementById('tanggal').value||'',tglShort='';
   if(tgl){var tp=tgl.split('-');tglShort=tp[2]+'/'+tp[1]+'/'+tp[0];}
-  var prods=store==='AEON'?PRODUCTS.aeon:PRODUCTS.watsons,kosong=[],menipis=[];
+  var prods=getProdsFor(store),kosong=[],menipis=[];
   for(var i=0;i<prods.length;i++){var d=qtyData[store][i]||{},tot=calcTotal(d);if(tot===0)kosong.push(prods[i].desc);else if(tot===1||tot===2)menipis.push(prods[i].desc);}
   var headerLine=(store==='WATSONS'?(storeCode?'Watsons '+storeCode+' '+storeName2:'Watsons'):(storeName2||'Aeon'))+'\n'+tglShort;
   var tmpl=loadWATemplates(),kunjKey=store==='AEON'?'aeon_kunjungan':'watsons_kunjungan';
@@ -5080,7 +5079,7 @@ function openResetModal(){document.getElementById('resetOverlay').classList.add(
 function closeResetModal(){document.getElementById('resetOverlay').classList.remove('open');}
 function closeResetOnBg(e){if(e.target===document.getElementById('resetOverlay'))closeResetModal();}
 function confirmReset(){
-  qtyData.AEON={};qtyData.WATSONS={};_activeFilterKey=null;updateFilterBtnState();
+  qtyData.AEON={};qtyData.WATSONS={};qtyData.BOOTS={};_activeFilterKey=null;updateFilterBtnState();
   _undoStack=[];_redoStack=[];updateUndoRedoUI();
   document.getElementById('storeCode').value='';document.getElementById('storeName2').value='';
   document.getElementById('storeDisplay').textContent='Pilih toko...';
@@ -5124,7 +5123,7 @@ function exportExcel(){
   function stk(fill,fontColor,sz,bold,halign){return st(fill,fontColor,sz,bold,halign,'center',false);}
   var wb=XLSX.utils.book_new();
   ['AEON','WATSONS'].forEach(function(store){
-    var prods=store==='AEON'?PRODUCTS.aeon:PRODUCTS.watsons;
+    var prods=getProdsFor(store);
     var rows=[],styles={},merges=[],rowHeights={};
     function addr(r,c){var col='',cc=c;do{col=String.fromCharCode(65+(cc%26))+col;cc=Math.floor(cc/26)-1;}while(cc>=0);return col+(r+1);}
     function sty(r,c,s){styles[addr(r,c)]=s;}
@@ -5210,7 +5209,7 @@ function exportExcel(){
   });
   var tgl2=document.getElementById('tanggal').value||'',fileDateStr='\u2014';
   if(tgl2){var parts=tgl2.split('-');if(parts.length===3)fileDateStr=parts[2]+'_'+parts[1];}
-  var fileStorePart=storeCode?(storeCode+' '+storeName2):sheetSel;
+  var fileStorePart=sheetSel==='AEON'?(storeName2||'AEON'):(storeCode?(storeCode+' '+storeName2):sheetSel);
   XLSX.writeFile(wb,fileStorePart+' '+fileDateStr+'.xlsx');
   showToast('\u2705 File Excel berhasil didownload!');
 }
@@ -5238,21 +5237,23 @@ function openIRStoreDD(){
 function closeIRStoreDD(){_irDDOpen=false;document.getElementById('irStoreDD').classList.remove('open');}
 function renderIRStoreList(q){
   var query=(q||'').toLowerCase().trim();
-  var filtered=query?STORE_DB.filter(function(s){return s.code.toLowerCase().indexOf(query)>=0||s.name.toLowerCase().indexOf(query)>=0;}):STORE_DB;
+  var sheet=document.getElementById('irSheetStore').value||'AEON';
+  var base=STORE_DB.filter(function(s){return storeAllowedForSheet(s,sheet);});
+  var filtered=query?base.filter(function(s){return s.code.toLowerCase().indexOf(query)>=0||s.name.toLowerCase().indexOf(query)>=0;}):base;
   var list=document.getElementById('irStoreList');
   if(!filtered.length){list.innerHTML='<div class="store-empty">Toko tidak ditemukan</div>';return;}
   var html='';
   for(var i=0;i<filtered.length;i++){
     var s=filtered[i];
     html+='<div class="store-opt" onmousedown="pickIRStore(\''+s.code+'\',\''+s.name.replace(/'/g,"\\'")+'\')">'
-        +'<span class="store-code">'+s.code+'</span><span class="store-name">'+s.name+'</span></div>';
+        +'<span class="store-code">'+(sheet==='AEON'?'':s.code)+'</span><span class="store-name">'+s.name+'</span></div>';
   }
   list.innerHTML=html;
 }
 function pickIRStore(code,name){
   document.getElementById('irStoreCode').value=code;
   document.getElementById('irStoreName').value=name;
-  document.getElementById('irStoreDisplay').textContent=code+' \u2014 '+name;
+  document.getElementById('irStoreDisplay').textContent=storeDisplayLabel(code,name,document.getElementById('irSheetStore').value);
   closeIRStoreDD();
   saveInputReportToStorage();
   generateInputReport();
@@ -5265,6 +5266,7 @@ window.addEventListener('scroll',function(){if(_irDDOpen)openIRStoreDD();},true)
 // ── Sheet change ──────────────────────────────────────────────────
 function onIRSheetChange(){
   saveInputReportToStorage();
+  renderIRStoreList('');
   generateInputReport();
 }
 
@@ -5568,7 +5570,7 @@ function buildHistoryName(){
   var storeCode=document.getElementById('storeCode').value||'';
   var storeName2=document.getElementById('storeName2').value||'';
   var tgl=document.getElementById('tanggal').value||'';
-  var nameToko=storeCode?(storeCode+' '+storeName2):(storeName2||'Toko');
+  var nameToko=currentStore==='AEON'?(storeName2||'AEON'):(storeCode?(storeCode+' '+storeName2):(storeName2||'Toko'));
   var tglShort='';
   if(tgl){var p=tgl.split('-');tglShort=p[2]+'_'+p[1];}
   return nameToko+(tglShort?' '+tglShort:'');
@@ -5601,7 +5603,7 @@ function saveFormOpnameToHistory(){
     storeDisplay:storeDisplay,
     tanggal:tgl,
     namaBA:namaBA,
-    qtyData:{AEON:JSON.parse(JSON.stringify(qtyData.AEON||{})),WATSONS:JSON.parse(JSON.stringify(qtyData.WATSONS||{}))}
+    qtyData:{AEON:JSON.parse(JSON.stringify(qtyData.AEON||{})),WATSONS:JSON.parse(JSON.stringify(qtyData.WATSONS||{})),BOOTS:JSON.parse(JSON.stringify(qtyData.BOOTS||{}))}
   };
 
   // ── Simpan ke cache lokal & localStorage terlebih dahulu (sinkron, pasti berhasil) ──
@@ -5869,7 +5871,7 @@ function loadFromStorage(){
   try{
     var raw=localStorage.getItem(LS_KEY);if(!raw)return;
     var p=JSON.parse(raw);
-    if(p.qtyData){if(p.qtyData.AEON)qtyData.AEON=p.qtyData.AEON;if(p.qtyData.WATSONS)qtyData.WATSONS=p.qtyData.WATSONS;}
+    if(p.qtyData){if(p.qtyData.AEON)qtyData.AEON=p.qtyData.AEON;if(p.qtyData.WATSONS)qtyData.WATSONS=p.qtyData.WATSONS;if(p.qtyData.BOOTS)qtyData.BOOTS=p.qtyData.BOOTS;}
     if(p.storeCode)document.getElementById('storeCode').value=p.storeCode;
     if(p.storeName2)document.getElementById('storeName2').value=p.storeName2;
     if(p.storeDisplay)document.getElementById('storeDisplay').textContent=p.storeDisplay;
