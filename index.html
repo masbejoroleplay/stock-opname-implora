@@ -3612,7 +3612,7 @@ document.addEventListener('click', function(e) { if (_filterDDOpen && !e.target.
 // ================================================================
 var COLOR_MODIFIERS = ['dark','ash','medium','light','natural','warm','cool','deep','soft'];
 function entryMatchesProduct(entryLabel, p) {
-  var el = entryLabel.toLowerCase().trim().replace(/\bmauve\b/g,'mouve'), d = p.desc.toLowerCase(), k = p.kode.toLowerCase();
+  var el = entryLabel.toLowerCase().trim().replace(/\bmauve\b/g,'mouve'), d = p.desc.toLowerCase().replace(/\bmauve\b/g,'mouve'), k = p.kode.toLowerCase();
   function escRe(s) { return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
   function wholeWord(haystack, needle) { return new RegExp('(?:^|[^a-z0-9])'+escRe(needle)+'(?:[^a-z0-9]|$)').test(haystack); }
   var entryWords = el.split(/\s+/), isPlainColor = entryWords.length === 1 && COLOR_MODIFIERS.indexOf(entryWords[0]) < 0;
@@ -3621,13 +3621,31 @@ function entryMatchesProduct(entryLabel, p) {
   var stripped = el.replace(/^\d+\s+/,'').trim();
   if (stripped && stripped !== el && (wholeWord(d, stripped) || wholeWord(k, stripped))) return true;
   var numOnly = el.match(/^(\d+)$/);
-  return !!(numOnly && k.match(new RegExp('[\-\.x]0*'+numOnly[1]+'(?:\D|$)')));
+  if (numOnly) {
+    var shade = String(parseInt(numOnly[1], 10));
+    var shade2 = shade.padStart(2, '0');
+    var numericTokens = k.match(/(?:^|[^0-9])([0-9]{4})(?:[^0-9]|$)/g) || [];
+    for (var ni = 0; ni < numericTokens.length; ni++) {
+      var digits = numericTokens[ni].replace(/\D/g, '');
+      if (digits.slice(-2) === shade2) return true;
+    }
+    if (new RegExp('(?:^|[^0-9])0*'+shade+'(?:[^0-9]|$)').test(d)) return true;
+    if (new RegExp('[\\-\\.]0*'+shade+'(?:\\D|$)').test(k)) return true;
+  }
+  return false;
 }
 function catMatchesProduct(p, catKey) {
-  var kws = CAT_MAP[catKey]; if (!kws) return false;
+  var normalizedKey = normalizeCategoryKey(catKey);
+  var kws = CAT_MAP[normalizedKey]; if (!kws) return false;
   var d = p.desc.toLowerCase(), k = p.kode.toLowerCase();
   for (var i = 0; i < kws.length; i++) if (d.indexOf(kws[i]) >= 0 || k.indexOf(kws[i]) >= 0) return true;
   return false;
+}
+
+function normalizeCategoryKey(key) {
+  var k = String(key || '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+  var aliases = {'lip_cream_urban':'lip_cream_urban','urban_matte_lipcream':'lip_cream_urban','lip_cream_matte':'lip_cream_matte','matte_lip_cream':'lip_cream_matte','lite_matte_lip_cream':'lite_matte_lip_cream'};
+  return aliases[k] || k;
 }
 
 // ================================================================
@@ -4264,7 +4282,7 @@ var STORE_DB=[
 // REPOSITORY — daftar kode toko yang masuk channel Repository
 // (selain kode di bawah ini, otomatis masuk ke History)
 // ================================================================
-var REPOSITORY_STORE_CODES=['GPK','ICM','NBM','BUP','CIM','GGP','LHI','PPG','CPJ','KJI','MCJ','MKK','PZK','PFT','LWK','PCB','TCB','KCS','GMM','LCK','MMB','PMB','MAG','MKG','MOI','SNM','CMM','CCM','AOS','BTM'];
+var REPOSITORY_STORE_CODES=['GPK','ICM','NBM','BUP','CIM','GGP','LHI','PPG','CPJ','KJI','MCJ','MKK','PZK','PFT','LWK','PCB','TCB','KCS','GMM','LCK','MMB','PMB','MAG','MKG','MOI','SNM','CMM','CCM','BTM','1004','1002','7001','1003','1007','1005','7005'];
 function isRepoStore(code){return REPOSITORY_STORE_CODES.indexOf(code)>=0;}
 
 // ================================================================
@@ -5403,6 +5421,18 @@ var LS_HISTORY_KEY='implora_history_cache_v1';
 function saveHistoryCacheToLS(){try{localStorage.setItem(LS_HISTORY_KEY,JSON.stringify(_historyCache));}catch(e){}}
 function loadHistoryCacheFromLS(){try{var r=localStorage.getItem(LS_HISTORY_KEY);if(r){var d=JSON.parse(r);if(Array.isArray(d)){_historyCache=d;return d;}}}catch(e){}return [];}
 
+var LS_AEON_BACKUP_KEY='implora_aeon_history_backup_v1';
+function saveAeonHistoryBackup(items){try{if(Array.isArray(items)&&items.length)localStorage.setItem(LS_AEON_BACKUP_KEY,JSON.stringify(items));}catch(e){}}
+function loadAeonHistoryBackup(){try{var r=localStorage.getItem(LS_AEON_BACKUP_KEY);var d=r?JSON.parse(r):[];return Array.isArray(d)?d:[];}catch(e){return [];}}
+function isAeonSnapshot(item){return item&&String(item.sheet||'').toUpperCase()==='AEON';}
+function mergeRecoveredAeon(data){
+  var byId={};
+  (Array.isArray(data)?data:[]).forEach(function(x){byId[String(x.id)]=x;});
+  _historyCache.filter(isAeonSnapshot).forEach(function(x){if(!byId[String(x.id)])byId[String(x.id)]=x;});
+  loadAeonHistoryBackup().forEach(function(x){if(!byId[String(x.id)])byId[String(x.id)]=x;});
+  return Object.keys(byId).map(function(k){return byId[k];}).sort(function(a,b){return Number(b.id||0)-Number(a.id||0);});
+}
+
 // ── PENDING SYNC QUEUE ────────────────────────────────────────────
 // Item yang BELUM berhasil terkirim ke server (D1) disimpan di sini,
 // supaya otomatis dicoba ulang nanti (online lagi / app dibuka lagi),
@@ -5503,6 +5533,7 @@ setInterval(function(){if(loadPendingQueue().length||loadPendingDeleteQueue().le
 
 async function getHistoryData(){
   try{
+    saveAeonHistoryBackup(_historyCache.filter(isAeonSnapshot));
     var res=await fetchWithTimeout(D1_API_URL+'/history',{},10000);
     if(!res.ok)throw new Error('HTTP '+res.status);
     var data=await res.json();
@@ -5526,6 +5557,7 @@ async function getHistoryData(){
         data=pendingLocal.concat(data);
         data.sort(function(a,b){return b.id-a.id;});
       }
+      data=mergeRecoveredAeon(data);
       _historyCache=data;
     }
     saveHistoryCacheToLS();
